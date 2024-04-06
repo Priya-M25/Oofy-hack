@@ -1,6 +1,6 @@
 body {
   /* Set the background image */
-  background-image: url('F:/Vani - Reva/bg1.jpeg');
+  background-image: url('F:/Vani - Reva/bg5.avif');
   /* Set background image to cover the entire viewport */
   background-size: cover;
   /* Ensure the background image is fixed */
@@ -12,7 +12,7 @@ body {
   /* Set background to not repeat */
   background-repeat: no-repeat;
   /* Set font color to be more visible on top of the background image */
-  color: #333; /* Dark text color */
+  color: #000000; /* Dark text color */
 }
 
 .previewComponent,
@@ -57,6 +57,11 @@ button:hover {
 }
 
 .processButton {
+  margin: 5pt;
+  height: 50px;
+  width: 150px;
+  text-align: center;
+  border-radius: 10px;
   margin-top: 20px; /* Add margin at the top */
 }
 
