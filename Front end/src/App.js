@@ -1,122 +1,161 @@
 import React, { Component } from 'react';
-import noImage from './noImage.png';
+import noImage from './noImage.png'
 import './App.css';
+//import ReactDOM from 'react-dom';
+
+// textInput must be declared here so the ref callback can refer to it
+//let textInput = null;
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { rotate: false, translate: false, scale: false, opacity: false };
+    this.state={rotate:false,translate:false,scale:false,opacity:false }
     this.changeHandler = this.changeHandler.bind(this);
   }
-
   changeHandler(state) {
     this.setState(state);
   }
-
   render() {
     return (
       <div className="overall">
         <div className="image">
-          <ImageUpload
-            rotate={this.state.rotate}
-            translate={this.state.translate}
-            scale={this.state.scale}
-            opacity={this.state.opacity}
-          />
+          <ImageUpload rotate={this.state.rotate}
+                        translate={this.state.translate}
+                        scale={this.state.scale}
+                        opacity={this.state.opacity} />
         </div>
         <div className="editing">
-          <Application
-            onChange={this.changeHandler}
-            rotate={this.state.rotate}
-            translate={this.state.translate}
-            scale={this.state.scale}
-            opacity={this.state.opacity}
-          />
+          <Application onChange={this.changeHandler}
+                        rotate={this.state.rotate}
+                        translate={this.state.translate}
+                        scale={this.state.scale}
+                        opacity={this.state.opacity} />
         </div>
       </div>
-    );
+    )
   }
 }
 
 class ImageUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { imageFile: null, csvFile: null };
+    this.state = {
+      imageFile: '',
+      imagePreviewUrl: '',
+      csvFile: '',
+      csvFileName: ''
+    };
     this.handleImageChange = this.handleImageChange.bind(this);
-    this.handleCSVChange = this.handleCSVChange.bind(this);
+    this.handleCsvChange = this.handleCsvChange.bind(this);
   }
 
   handleImageChange(e) {
     e.preventDefault();
-    const imageFile = e.target.files[0];
-    this.setState({ imageFile });
+    let reader = new FileReader();
+    let file = e.target.files[0];
+    reader.onloadend = () => {
+      this.setState({
+        imageFile: file,
+        imagePreviewUrl: reader.result
+      });
+    }
+    reader.readAsDataURL(file);
   }
 
-  handleCSVChange(e) {
+  handleCsvChange(e) {
     e.preventDefault();
-    const csvFile = e.target.files[0];
-    this.setState({ csvFile });
+    let file = e.target.files[0];
+    this.setState({
+      csvFile: file,
+      csvFileName: file.name
+    });
   }
 
   render() {
-    const { imageFile, csvFile } = this.state;
+    let { imagePreviewUrl, imageFile, csvFileName } = this.state;
+
+    let imagePreview = null;
+    if (imagePreviewUrl) {
+      imagePreview = (<img src={imagePreviewUrl} alt="" />);
+    } else {
+      imagePreview = (<div></div>);
+    }
 
     return (
       <div className="previewComponent">
         <div>
-          <h1 className="font-bold text-4xl" style={{ color: '#ffffff' }}>
-            NIGHT TIME ANALYZER
-          </h1>
+          <h1 className="font-bold text-4xl" style={{ color: '#000000' }}>NIGHT TIME ANALYZER</h1>
         </div>
-        <div className="imgPreview">
-          {imageFile && <p>Selected Image: {imageFile.name}</p>}
-          {csvFile && <p>Selected CSV: {csvFile.name}</p>}
-        </div>
-        <input id="imageInput" type="file" accept="image/*" onChange={this.handleImageChange} style={{ display: 'none' }} />
-        <input id="csvInput" type="file" accept=".csv" onChange={this.handleCSVChange} style={{ display: 'none' }} />
 
-        <button href="#" className="choosebutton" onClick={() => document.getElementById('imageInput').click()}>
-          <label htmlFor="imageInput">Choose Image</label>
-        </button>
-        <button href="#" className="choosebutton" onClick={() => document.getElementById('csvInput').click()}>
-          <label htmlFor="csvInput">Choose CSV</label>
-        </button>
+
+        <div className="imgPreview">
+          {imagePreview}
+        </div>
+        <div>
+          <input id="fileInput" type="file" onChange={this.handleImageChange} style={{ display: 'none' }} />
+          <button className="choosebutton" onClick={() => document.getElementById('fileInput').click()}>
+            Choose Image
+          </button>
+        </div>
+        <div>OR</div>
+        <div>
+          <input id="csvInput" type="file" accept=".csv" onChange={this.handleCsvChange} style={{ display: 'none' }} />
+          <button className="choosebutton" onClick={() => document.getElementById('csvInput').click()}>
+            Choose CSV
+          </button>
+          {csvFileName && <p>Selected CSV: {csvFileName}</p>}
+        </div>
       </div>
     );
   }
 }
 
+
 class Application extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isProcessed: false };
+    // Define a state variable to track whether an image is processed
+    this.state = {
+      isProcessed: false
+    };
+    // Bind the reset function to access 'this'
     this.handleReset = this.handleReset.bind(this);
   }
 
+  // Function to handle reset button click
   handleReset() {
+    // Reset the state to indicate no image is processed
     this.setState({ isProcessed: false });
   }
 
   render() {
-    const processedImage = this.state.isProcessed ? <img src="pdf_logo.png" alt="Processed PDF Logo" /> : null;
-
-    const actionButton = this.state.isProcessed ? (
+    // Display the PDF logo image only when it is processed
+    let processedImage = null;
+    if (this.state.isProcessed) {
+      processedImage = <img src="pdf_logo.png" alt="Processed PDF Logo" />;
+    }
+  
+    // If image is processed, display the reset button, else display the process button
+    let actionButton = this.state.isProcessed ? (
       <button className="resetButton" onClick={this.handleReset}>
         Reset
       </button>
     ) : (
       <button className="processButton" onClick={() => this.setState({ isProcessed: true })}>
-        Process this!
+        Click here to get the result!
       </button>
     );
-
+  
     return (
       <div className="edit">
+        {/* Display the processed image or null */}
         {processedImage}
-        <div>{actionButton}</div>
+        {/* Display the action button */}
+        <div>
+          {actionButton}
+        </div>
       </div>
     );
   }
-}
-
+}  
 export default App;
