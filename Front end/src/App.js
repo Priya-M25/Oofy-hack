@@ -91,13 +91,7 @@ class ImageUpload extends React.Component {
         <div className="imgPreview">
           {imagePreview}
         </div>
-        <div>
-          <input id="fileInput" type="file" onChange={this.handleImageChange} style={{ display: 'none' }} />
-          <button className="choosebutton" onClick={() => document.getElementById('fileInput').click()}>
-            Choose Image
-          </button>
-        </div>
-        <div>OR</div>
+        
         <div>
           <input id="csvInput" type="file" accept=".csv" onChange={this.handleCsvChange} style={{ display: 'none' }} />
           <button className="choosebutton" onClick={() => document.getElementById('csvInput').click()}>
