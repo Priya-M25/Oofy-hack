@@ -86,8 +86,8 @@ class ImageUpload extends React.Component {
         <div>
           <h1 className="font-bold text-4xl" style={{ color: '#000000' }}>NIGHT TIME ANALYZER</h1>
         </div>
-
-
+        <div style={{ color: '#000000' }}>A website for analyzing poverty levels in urban areas based on nighttime satellite imagery.</div>
+        
         <div className="imgPreview">
           {imagePreview}
         </div>
@@ -126,7 +126,7 @@ class Application extends React.Component {
     // Display the PDF logo image only when it is processed
     let processedImage = null;
     if (this.state.isProcessed) {
-      processedImage = <img src="pdf_logo.png" alt="Processed PDF Logo" />;
+      processedImage = <img src="sample output.png" alt="Processed PDF Logo" />;
     }
   
     // If image is processed, display the reset button, else display the process button
