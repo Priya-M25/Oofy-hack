@@ -31,10 +31,13 @@ This project offers a comprehensive socio-economic analysis of Indian states thr
 ## Image from the project
 
 ### Website landing page
+![Input Image](input.jpg)
 
 ### Processed
+![Input Image](output.jpg)
 
 ### Output Image (Poverty Map of INDIA statewise)
+![Input Image](map.jpg)
 
 ## Video Demo
 
