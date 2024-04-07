@@ -41,7 +41,7 @@ This project offers a comprehensive socio-economic analysis of Indian states thr
 
 ## Video Demo
 
-
+https://youtube.com/shorts/3uIhsp56070?feature=share
 
 ## Contribution
 
