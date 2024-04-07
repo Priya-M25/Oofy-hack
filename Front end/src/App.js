@@ -118,9 +118,11 @@ class Application extends React.Component {
 
   // Function to handle reset button click
   handleReset() {
-    // Reset the state to indicate no image is processed
     this.setState({ isProcessed: false });
+    this.props.onChange({ csvFileName: '' });
+    window.location.reload(); // Refresh the page
   }
+
 
   render() {
     // Display the PDF logo image only when it is processed
