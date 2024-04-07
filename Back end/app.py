@@ -1,55 +1,76 @@
-from flask import Flask, request, jsonify
-import cv2
-import numpy as np
-import seaborn as sns
+from flask import Flask, render_template, request, send_file
+import json
+import pandas as pd
+import geopandas as gpd
 import matplotlib.pyplot as plt
-import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
-def process_image(image_data, threshold_value=127):
-    try:
-        # Convert base64 image data to numpy array
-        nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-        # Convert the image to grayscale
-        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+@app.route('/generate_map', methods=['POST'])
+def generate_map():
+    # Get the uploaded CSV file
+    csv_file = request.files['csv_file']
 
-        # Apply thresholding to isolate bright areas
-        ret, thresh_img = cv2.threshold(gray_img, threshold_value, 255, cv2.THRESH_BINARY)
+    # Load the CSV file
+    df = pd.read_csv(csv_file)
 
-        # Convert the processed image to base64
-        _, img_encoded = cv2.imencode('.jpg', thresh_img)
-        processed_image_data = base64.b64encode(img_encoded).decode('utf-8')
+    # Create a dictionary mapping states to their average values
+    state_average = dict(zip(df['State'], df['Average']))
 
-        # Create a heatmap of the original image
-        sns.heatmap(gray_img)
-        plt.savefig('heatmap.png')
-        with open('heatmap.png', 'rb') as f:
-            heatmap_image_data = base64.b64encode(f.read()).decode('utf-8')
+    # Load the GeoJSON file
+    with open('gadm41_IND_1.json', 'r') as f:
+        geojson_data = json.load(f)
 
-        return processed_image_data
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Iterate over features and add 'average' property
+    for feature in geojson_data['features']:
+        state_name = feature['properties']['NAME_1']
+        if state_name in state_average:
+            feature['properties']['average'] = state_average[state_name]
+        else:
+            feature['properties']['average'] = None  # Or any default value if average is not found
 
-@app.route('/process_image', methods=['POST'])
-def process_image_route():
-    try:
-        # Check if the request contains an image file
-        if 'image' not in request.files:
-            return jsonify({'error': 'No image found in the request'}), 400
+    # Save the updated GeoJSON file
+    with open('gadm41_IND_1_with_average.json', 'w') as f:
+        json.dump(geojson_data, f)
 
-        image_file = request.files['image']
-        image_data = image_file.read()
+    # Load the GeoJSON file with average values
+    gdf = gpd.read_file('gadm41_IND_1_with_average.json')
 
-        # Process the image
-        processed_image_data = process_image(image_data)
+    # Set the scale factor for brightness adjustment
+    scale_factor = 1.5  # You can adjust this value as needed to increase or decrease brightness
 
-        # Return the processed image data
-        return jsonify({'processed_image': processed_image_data}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Calculate the new vmin and vmax based on the scale factor
+    vmin = gdf['average'].min()
+    vmax = gdf['average'].max() * scale_factor
+
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # Plot the GeoDataFrame on the axis, using the 'average' column for coloring
+    gdf.plot(column='average', ax=ax, legend=True, cmap='viridis', edgecolor='black', linewidth=0.5, vmin=vmin, vmax=vmax)
+
+    # Add title
+    plt.title('Average Values per State')
+
+    # Add labels for colorbar
+    cbar = ax.get_figure().get_axes()[1]
+    cbar.set_ylabel('Average Value')
+
+    # Save the plot to a BytesIO object
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+
+    # Clear the plot
+    plt.close()
+
+    # Return the image file to the front end
+    return send_file(buffer, mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=True)
