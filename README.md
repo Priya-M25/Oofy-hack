@@ -34,7 +34,7 @@ This project offers a comprehensive socio-economic analysis of Indian states thr
 ![Input Image](input.png)
 
 ### Processed
-![Input Image](output.png)
+![Input Image](out.png)
 
 ### Output Image (Poverty Map of INDIA statewise)
 ![Input Image](map.jpg)
