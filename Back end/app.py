@@ -1,4 +1,62 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, request, jsonify
+import pandas as pd
+import matplotlib.pyplot as plt
+from io import BytesIO
+
+app = Flask(_name_)
+
+@app.route('/process_csv', methods=['POST'])
+def process_csv():
+  # Get the CSV file from the request
+  csv_file = request.files['csv']
+
+  # Try to read the CSV file
+  try:
+    df = pd.read_csv(csv_file)
+  except Exception as e:
+    # Handle invalid CSV (return error message)
+    return jsonify({'error': 'Invalid CSV file format'}), 400
+
+  # Assume the first two columns are 'State' and 'Average' (modify as needed)
+  states = df['State'].tolist()
+  averages = df['Average'].tolist()
+
+  # Create a simple bar chart
+  plt.figure(figsize=(8, 6))
+  plt.bar(states, averages)
+  plt.xlabel('State')
+  plt.ylabel('Average')
+  plt.title('Average Values')
+
+  # Save the plot to a BytesIO object
+  buffer = BytesIO()
+  plt.savefig(buffer, format='png')
+  buffer.seek(0)
+
+  # Clear the plot
+  plt.close()
+
+  # Return the image file to the frontend
+  return jsonify({'processed_image': buffer.getvalue().decode('latin1')})
+
+if _name_ == '_main_':
+  app.run(debug=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#================================================================================================================================================================
+'''from flask import Flask, render_template, request, send_file
 import json
 import pandas as pd
 import geopandas as gpd
@@ -73,4 +131,4 @@ def generate_map():
     return send_file(buffer, mimetype='image/png')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True)'''
